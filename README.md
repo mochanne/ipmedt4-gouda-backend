@@ -2,9 +2,9 @@
 # Gouda wandelroute
 
 ## wandelroutes
-lokale download van alle assets van de wandelroutes
+Lokale download van alle assets van de wandelroutes
 
 ## laravel
-de backend in laravel
+Het backend in laravel.
 
-volg de installatie in `laravel/README.md` om werkend te krijgen
+Volg de installatie instructies in `laravel/README.md`
