@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer("index");
             // $table->foreignIdFor(WandelRoute::class); // model nodig
+            $table->foreignId("wandelroute_id")->constrained();
             $table->point("positie");
         });
     }

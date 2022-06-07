@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('infopoint', function (Blueprint $table) {
+        Schema::create('infopoints', function (Blueprint $table) {
             $table->id();
             $table->integer("index"); // volgorde in verhouding met andere punten. gebruikt voor sorteren
-            // $table->foreignIdFor(WandelRoute::class); // model nodig
+            $table->foreignId("wandelroute_id")->constrained();
             $table->string("naam", 128)->nullable(); // naam van het punt
             $table->string("afbeelding",255);
             $table->point("positie"); // long/las positie
