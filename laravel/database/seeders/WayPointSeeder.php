@@ -23,7 +23,7 @@ class WayPointSeeder extends Seeder
             'longitude' => 10.752465239770952
         ]);
         DB::table('waypoints')->insert([
-            'index' => 0,
+            'index' => 1,
             'wandelroute_id' => 1,
             'latitude' => 59.915179790103934,
             'longitude' => 10.751629792858958

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string("naam", 128)->nullable(); // naam van het punt
             $table->string("afbeelding",255);
             $table->decimal("latitude",8,6);
-            $table->decimal("longitudes",9,6);
+            $table->decimal("longitude",9,6);
             $table->text("gedicht");
             $table->text("info")->nullable();
         });

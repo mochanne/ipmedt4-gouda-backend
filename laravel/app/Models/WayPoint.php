@@ -9,4 +9,6 @@ class WayPoint extends Model
 {
     protected $table = "waypoints";
 
+
+
 }

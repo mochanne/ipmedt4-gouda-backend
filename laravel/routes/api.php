@@ -18,6 +18,6 @@ Route::get('ping', function () {
     return 'pong';
 });
 
-Route::get('test', function() {
-    return \App\Models\WandelRoute::all();
-});
+Route::get('routelist', [\App\Http\Controllers\APIcontroller::class, 'GetRouteList']);
+
+Route::get('routeinfo/{route_id}', [\App\Http\Controllers\APIcontroller::class, 'GetRouteInfo']);
