@@ -136,14 +136,18 @@ def InteractiveInfoPointAdder(path):
             break
         else:
             try:
-                lat, long = [float(a.strip()) for a in choice.split(', ')]
-                with open(path+'/'+item, 'w+') as f:
-                    in_ = json.loads(f.read())
-                    in_['longitude'] = long
-                    in_['latitude'] = lat
-                    f.write(json.dumps(in_))
+                lat, long = [float(a.strip()) for a in choice.split(',')]
+                with open(path+'/'+item+'/data.json', 'r') as f:
+                    in_ = f.read()
+                    jsono = json.loads(in_)
+
+                with open(path+'/'+item+'/data.json', 'w') as f:
+                    jsono['longitude'] = long
+                    jsono['latitude'] = lat
+                    f.write(json.dumps(jsono))
             except Exception as e:
                 print('Ongeledige input:',e)
+                raise e
         print()
 
 def InteractiveWaypointEnter(path):
