@@ -19,6 +19,81 @@ def choose(choices:list, prompt:str="Kies een optie:", vraag="Nummer: ", return_
         print("Ongeldige keuze.")
         print()
 
+def CheckCompleteness(path):
+    total_tests = 0
+    good_tests = 0
+    NL = '\n     > '
+    helps = set()
+    print("Data completeness test voor",path)
+
+    def good(*args):
+        nonlocal total_tests
+        nonlocal good_tests
+        total_tests += 1
+        good_tests += 1
+        print('  ✅',*args)
+    def bad(*args, help=None):
+        nonlocal total_tests
+        total_tests += 1
+        print('  ❌',*args)
+        if help != None:
+            print('     🛈',help)
+            helps.add('     🛈 '+help)
+    def check(condition,prompt="klopt",suffix=" niet", ormode = False, help=None):
+        if condition:
+            good(prompt)
+        else:
+            if ormode:
+                bad(suffix, help=help)
+            else:
+                bad(prompt+suffix, help=help)
+        return condition
+    contents = os.listdir(path)
+    if check('waypoints.json' in contents, "waypoints.json bestaat", help="Gebruik de 'Waypoints invullen' actie van dit tool."):
+        with open(path+'/waypoints.json','r') as f:
+            try:
+                in_ = json.loads(f.read())
+                good('waypoints.json is valid json')
+                check(len(in_) >= 2, f'waypoints.json heeft genoeg items ({len(in_)})', f'waypoints.json heeft niet genoeg items ({len(in_)})', True, "Gebruik de 'Waypoints invullen' actie van dit tool en voer minstens 2 coordinaten in.")
+            except json.JSONDecodeError as e:
+                bad('waypoints.json is invalid json!',e, help="Gebruik de 'Waypoints invullen' actie van dit tool en voer minstens 2 coordinaten in.")
+
+    dirs = GetDirs(path)
+    check(len(dirs) > 2, f"Er zijn genoeg infopoints ({len(dirs)})", f"Er zijn niet genoeg infopoints ({len(dirs)})", True, help="Download het dataset opnieuwe met scraper.py")
+    check(any([item.startswith(str(i+1)) and '$' in item for i,item in enumerate(dirs)]), 'Infopoints zijn correct gesorteerd', f'Infopoints zijn niet correct gesorteerd: {NL}{NL.join(dirs)}', True, "Gebruik de 'Sorteer' actie van dit tool.")
+    
+    missing_images = []
+    missing_json = []
+    missing_lat_long = []
+    for item in dirs:
+        mypath = path+'/'+item
+        found_img = False
+        for subitem in os.listdir(mypath):            
+            if subitem.startswith('img.'):
+                found_img = True
+        if not found_img:
+            missing_images.append(item)
+        if 'data.json' in os.listdir(mypath):
+            with open(mypath+'/data.json', 'r') as f:
+                in_ = json.loads(f.read())
+                if in_.get('latitude') == None or in_.get('longitude') == None:
+                    missing_lat_long.append(item+'/data.json')
+
+        else:
+            missing_json.append(item)
+            missing_lat_long.append(item+'/data.json')
+    
+
+    check(len(missing_images) == 0, 'Alle infopoints hebben afbeeldingen', f'Deze {len(missing_images)} infopoints missen een afbeelding: {NL}{NL.join(missing_images)}', True, 'Download het dataset opnieuw met scraper.py')
+    check(len(missing_json) == 0, 'Alle infopoints hebben data', f'Deze {len(missing_json)} infopoints missen data: {NL}{NL.join(missing_json)}', True, 'Download het dataset opnieuw met scraper.py')
+    check(len(missing_lat_long) == 0, 'Alle infopoints hebben een latitude & longitude waarde', f'Deze {len(missing_lat_long)} infopoints missen een latitude en/of longitude waarde: {NL}{NL.join(missing_lat_long)}', True, "Gebruik de 'Infopoints invullen' actie van dit tool.")
+
+    print()
+    if not check(total_tests == good_tests, f"{good_tests}/{total_tests} testen correct: Data is OK", f"{good_tests}/{total_tests} testen correct: Data heeft ingrijp nodig", True):
+        print("    Aangeraden acties:")
+        print('\n'.join(helps))
+    print()
+
 def dirsort(a):
     return int(a.split('$')[0]) if '$' in a else 9999
 
@@ -48,12 +123,49 @@ def InteractiveDirectorySort(path):
         os.rename(path+'/'+item, path+'/'+newname)
 
 def InteractiveInfoPointAdder(path):
-    pass
+    items = GetDirs(path)
+    print("copy-paste coordinaten van google maps & druk enter")
+    print("vul STOP in om te stoppen")
+    print("vul niks in om het huidige item over te slaan")
+    for i,item in enumerate(items):
+        print(f"   {i+1}/{len(items)}: "+item)
+        choice = input('>')
+        if choice == "":
+            continue
+        elif choice.lower() == "stop":
+            break
+        else:
+            try:
+                lat, long = [float(a.strip()) for a in choice.split(', ')]
+                with open(path+'/'+item, 'w+') as f:
+                    in_ = json.loads(f.read())
+                    in_['longitude'] = long
+                    in_['latitude'] = lat
+                    f.write(json.dumps(in_))
+            except Exception as e:
+                print('Ongeledige input:',e)
+        print()
 
 def InteractiveWaypointEnter(path):
-    pass
+    out = []
+    print("copy-paste coordinaten van google maps & druk enter")
+    print("vul STOP in om te stoppen")
+    while True:
+        choice = input('>')
+        if choice.lower() == "stop":
+            break
+        else:
+            try:
+                lat, long = [float(aangemaakt.strip()) for a in choice.split(', ')]
+                out.append({'longitude': long, 'latitude': lat})
+            except Exception as e:
+                print('Ongeledige input:',e)
+    with open(path+'/waypoints.json', 'w') as f:
+        print('Waypoints:', out)
+        f.write(json.dumps(out))
+        print('Opgeslagen als '+path+'/waypoints.json')
 
-acties = {'Sorteer': InteractiveDirectorySort, 'Infopoints invullen': None, 'Waypoints invullen':None}
+acties = {'Sorteer': InteractiveDirectorySort, 'Infopoints invullen': InteractiveInfoPointAdder, 'Verifieer data completeness':CheckCompleteness, 'Waypoints invullen':InteractiveWaypointEnter, 'Sluit programma':exit}
 
 def line():
     print('-'*30)
