@@ -38,10 +38,11 @@ class AutoDBSeeder extends Seeder
                     'index' => $IP_index,
                     'wandelroute_id' => $index,
                     'naam' => $json['titel'],
+                    'info' => $json['info'],
                     'gedicht' => $json['gedicht'],
                     'latitude' => $json['latitude'] ?? 0.0,
                     'longitude' => $json['longitude'] ?? 0.0,
-                    'afbeelding' => URL::to('/storage/wandelroutes/' . $IP_dir . '/img.jpeg')
+                    'afbeelding' => '/storage/wandelroutes/' . $IP_dir . '/img.jpeg'
                 ]);
             }
         }
