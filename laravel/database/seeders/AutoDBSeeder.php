@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class AutoDBSeeder extends Seeder
 {
@@ -32,7 +33,7 @@ class AutoDBSeeder extends Seeder
             foreach (Storage::disk('wandelroutes')->directories($item) as $IP_dir) {
                 $IP_index = explode('$',str_replace($item . '/', '',$IP_dir))[0];
                 $json = json_decode(Storage::disk('wandelroutes')->get($IP_dir . '/data.json'), true);
-
+                echo $IP_dir;
                 DB::table('infopoints')->insert([
                     'index' => $IP_index,
                     'wandelroute_id' => $index,
@@ -40,7 +41,7 @@ class AutoDBSeeder extends Seeder
                     'gedicht' => $json['gedicht'],
                     'latitude' => $json['latitude'] ?? 0.0,
                     'longitude' => $json['longitude'] ?? 0.0,
-                    'afbeelding' => $json['afbeelding']
+                    'afbeelding' => URL::to('/storage/wandelroutes/' . $IP_dir . '/img.jpeg')
                 ]);
             }
         }
