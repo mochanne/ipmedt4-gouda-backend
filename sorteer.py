@@ -1,5 +1,8 @@
+import re
 import os
 import json
+
+
 
 def choose(choices:list, prompt:str="Kies een optie:", vraag="Nummer: ", return_index=False):
     print(prompt)
@@ -18,6 +21,9 @@ def choose(choices:list, prompt:str="Kies een optie:", vraag="Nummer: ", return_
                 print(e)
         print("Ongeldige keuze.")
         print()
+
+
+
 
 def CheckCompleteness(path):
     total_tests = 0
@@ -57,6 +63,8 @@ def CheckCompleteness(path):
                 check(len(in_) >= 2, f'waypoints.json heeft genoeg items ({len(in_)})', f'waypoints.json heeft niet genoeg items ({len(in_)})', True, "Gebruik de 'Waypoints invullen' actie van dit tool en voer minstens 2 coordinaten in.")
             except json.JSONDecodeError as e:
                 bad('waypoints.json is invalid json!',e, help="Gebruik de 'Waypoints invullen' actie van dit tool en voer minstens 2 coordinaten in.")
+    else:
+        bad('waypoints.json is invalid json!', help="Gebruik de 'Waypoints invullen' actie van dit tool en voer minstens 2 coordinaten in.")
 
     dirs = GetDirs(path)
     check(len(dirs) > 2, f"Er zijn genoeg infopoints ({len(dirs)})", f"Er zijn niet genoeg infopoints ({len(dirs)})", True, help="Download het dataset opnieuwe met scraper.py")
@@ -65,6 +73,7 @@ def CheckCompleteness(path):
     missing_images = []
     missing_json = []
     missing_lat_long = []
+    scuffed_text = []
     for item in dirs:
         mypath = path+'/'+item
         found_img = False
@@ -76,14 +85,16 @@ def CheckCompleteness(path):
         if 'data.json' in os.listdir(mypath):
             with open(mypath+'/data.json', 'r') as f:
                 in_ = json.loads(f.read())
+                if len(IdentifyHtmlScuff(in_['gedicht'])) > 0 or len(IdentifyHtmlScuff(in_['info'])) > 0:
+                    scuffed_text.append(item+'/data.json')
                 if in_.get('latitude') == None or in_.get('longitude') == None:
                     missing_lat_long.append(item+'/data.json')
 
         else:
             missing_json.append(item)
             missing_lat_long.append(item+'/data.json')
-    
 
+    check(len(scuffed_text) == 0, 'Alle gedichten en info tekst bij de infopoints zijn correct geformateerd.', f'Infopoints hebben correct geformateerde gedichten/info tekst: {NL}{NL.join(scuffed_text)}', True, "Gebruik de 'Tekst formaat fixen' actie van dit tool.")
     check(len(missing_images) == 0, 'Alle infopoints hebben afbeeldingen', f'Deze {len(missing_images)} infopoints missen een afbeelding: {NL}{NL.join(missing_images)}', True, 'Download het dataset opnieuw met scraper.py')
     check(len(missing_json) == 0, 'Alle infopoints hebben data', f'Deze {len(missing_json)} infopoints missen data: {NL}{NL.join(missing_json)}', True, 'Download het dataset opnieuw met scraper.py')
     check(len(missing_lat_long) == 0, 'Alle infopoints hebben een latitude & longitude waarde', f'Deze {len(missing_lat_long)} infopoints missen een latitude en/of longitude waarde: {NL}{NL.join(missing_lat_long)}', True, "Gebruik de 'Infopoints invullen' actie van dit tool.")
@@ -97,10 +108,14 @@ def CheckCompleteness(path):
 def dirsort(a):
     return int(a.split('$')[0]) if '$' in a else 9999
 
+
+
 def GetDirs(path):
     items = [a for a in os.listdir(path) if os.path.isdir(path+'/'+a)]
     items.sort(key=dirsort)
     return items
+
+
 
 def InteractiveDirectorySort(path):
     items = GetDirs(path)
@@ -150,6 +165,39 @@ def InteractiveInfoPointAdder(path):
                 raise e
         print()
 
+def IdentifyHtmlScuff(text:str):
+    items = []
+
+    for i in re.finditer('[^\n^ ^\.][A-Z][a-z]+', text):
+        items.insert(0,i.start(0))
+    return items
+
+def HtmlDeScuffer(text, indexes):
+    out = text
+    for i in indexes:
+        out = out[:i+1]+". "+out[i+1:]
+    return out
+
+def InteractiveTextFixer(path):
+    anychanged = False
+    for p in GetDirs(path):
+        with open(path+'/'+p+'/data.json','r') as f:
+            data = json.loads(f.read())
+        changed = False
+        for key in ['gedicht', 'info']:
+            if len(x:=IdentifyHtmlScuff(data[key])) > 0:
+                data[key] = HtmlDeScuffer(data[key], x)
+                changed = True
+                anychanged = True
+                print(p+':',key,'gefixed')
+
+        if changed:
+            with open(path+'/'+p+'/data.json','w') as f:
+                f.write(json.dumps(data))
+    if not anychanged:
+        print("Tekst was al OK; geen veranderingen gemaakt")
+    print("klaar")
+
 def InteractiveWaypointEnter(path):
     out = []
     print("copy-paste coordinaten van google maps & druk enter")
@@ -169,7 +217,7 @@ def InteractiveWaypointEnter(path):
         f.write(json.dumps(out))
         print('Opgeslagen als '+path+'/waypoints.json')
 
-acties = {'Sorteer': InteractiveDirectorySort, 'Infopoints invullen': InteractiveInfoPointAdder, 'Verifieer data completeness':CheckCompleteness, 'Waypoints invullen':InteractiveWaypointEnter, 'Sluit programma':exit}
+acties = {'Sorteer': InteractiveDirectorySort, 'Infopoints invullen': InteractiveInfoPointAdder, 'Verifieer data completeness':CheckCompleteness, 'Waypoints invullen':InteractiveWaypointEnter, 'Tekst formaat fixen':InteractiveTextFixer, 'Sluit programma':exit}
 
 def line():
     print('-'*30)
