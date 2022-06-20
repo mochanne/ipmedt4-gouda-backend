@@ -11,6 +11,7 @@ class APIcontroller extends Controller
         $out = \App\Models\WandelRoute::all();
         foreach ($out as $route) {
             $route->afbeelding = $route->infopoints()->first()->afbeelding();
+            $route->aantal = $route->infopoints()->count();
         }
         return $out;
     }
@@ -23,6 +24,10 @@ class APIcontroller extends Controller
             $infopoint->afbeelding = $infopoint->afbeelding();
             //echo $infopoint->afbeelding;
         }
+        
+        $route->afbeelding = $route->infopoints()->first()->afbeelding();
+        $route->aantal = $route->infopoints()->count();
+
         $route->waypoints;
 
 
