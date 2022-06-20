@@ -20,3 +20,4 @@ Dit tool kan met gebruiker hulp het volgende:
 - De GPS locatie van punten toevoegen
 - Het unit testen van de route data om te controleren of het compleet en klaar is voor gebruik
 - Waypoints invullen (ongebruikt in het eindproduct)
+- Incorrect geformateerde tekst (missende spaties) van de website automatisch fixen
