@@ -37,37 +37,37 @@ GRANT ALL PRIVILEGES ON goudadb.* TO 'gouda'@'localhost';
 1. CD naar de root van deze repository (vanaf ./laravel: `cd ..`)
 
 2. Installeer de python packages:
-```bash
+```shell
 python3 -m pip install -r requirements.txt
 ```
 
 3. Download alle route data en volg de installer:
-```bash
+```shell
 python3 scraper.py
 ```
 
 4. Sorteer, vul GPS locaties & verifieer alle route data:
-```bash
+```shell
 python3 sorteer.py
 ```
 
 5. Kopieer de route data naar ./laravel/storage/app/public/: 
-```bash
+```shell
 cp -r wandelroutes laravel/storage/app/public/
 ```
 
 6. CD terug naar deze directory: 
-```bash
+```shell
 cd ./laravel
 ```
 
 7. Link de storage: 
-```bash
+```shell
 php artisan storage:link
 ```
 
 8. Migrate & seed de database met 
-```bash
+```shell
 php artisan migrate --seed
 ```
 
