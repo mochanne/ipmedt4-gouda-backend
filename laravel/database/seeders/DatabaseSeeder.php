@@ -16,9 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            WandelRouteSeeder::class,
-            WayPointSeeder::class,
-            InfoPointSeeder::class,
+            AutoDBSeeder::class,
+            // WandelRouteSeeder::class,
+            // WayPointSeeder::class,
+            // InfoPointSeeder::class,
         ]);
     }
 }

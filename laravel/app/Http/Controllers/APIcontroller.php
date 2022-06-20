@@ -15,7 +15,10 @@ class APIcontroller extends Controller
     {
         $route = \App\Models\WandelRoute::find($route_id);
 
-        $route->infopoints;
+        foreach ($route->infopoints as $infopoint) {
+            $infopoint->afbeelding = $infopoint->afbeelding();
+            //echo $infopoint->afbeelding;
+        }
         $route->waypoints;
 
 
