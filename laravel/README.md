@@ -8,8 +8,10 @@
 - PHP
 - Composer
 - MariaDB
+- Python3
+- De Python packages in requirements.txt
 
-### Setup
+### Laravel Setup
 
 1. run `composer global require laravel/laravel`
 2. maak een MariaDB database aan genaamd `gaudadb`: 
@@ -29,6 +31,26 @@ GRANT ALL PRIVILEGES ON goudadb.* TO 'gouda'@'localhost';
 
 ⚠️ ***Let op:** Het `.env` bestand staat **niet** in de `.gitignore`. Voeg deze hieraan toe tijdens productie om te voorkomen dat er legitieme credentials op de git komen* ⚠️
 
-5. Migrate & seed de database met `php artisan migrate --seed`
 
-Het backend is nu klaar voor gebruik 
+### Data installatie
+
+1. CD naar de root van deze repository (vanaf ./laravel: `cd ..`)
+
+2. Installeer de python packages met `python3 -m pip install -r requirements.txt`
+
+3. Download alle route data met `python3 scraper.py` en volg de installer
+
+4. Sorteer, vul GPS locaties & verifieer alle route data met `python3 sorteer.py`
+
+5. Kopieer de route data naar ./laravel/storage/app/public/ met `cp -r wandelroutes laravel/storage/app/public/`
+
+6. CD terug naar deze directory met `cd ./laravel`
+
+7. Link de storage met `php artisan storage:link`
+
+8. Migrate & seed de database met `php artisan migrate --seed`
+
+
+Het backend is nu klaar voor gebruik.
+
+Herhaal de data installatie stappen om de database informatie te updaten als er veranderingen zijn geweest.
