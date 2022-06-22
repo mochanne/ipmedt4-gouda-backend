@@ -8,14 +8,26 @@ class APIcontroller extends Controller
 {
     public function GetRouteList()
     {
-        return \App\Models\WandelRoute::all();
+        $out = \App\Models\WandelRoute::all();
+        foreach ($out as $route) {
+            $route->afbeelding = $route->infopoints()->first()->afbeelding();
+            $route->aantal = $route->infopoints()->count();
+        }
+        return $out;
     }
 
     public function GetRouteInfo($route_id)
     {
         $route = \App\Models\WandelRoute::find($route_id);
 
-        $route->infopoints;
+        foreach ($route->infopoints as $infopoint) {
+            $infopoint->afbeelding = $infopoint->afbeelding();
+            //echo $infopoint->afbeelding;
+        }
+        
+        $route->afbeelding = $route->infopoints()->first()->afbeelding();
+        $route->aantal = $route->infopoints()->count();
+
         $route->waypoints;
 
 

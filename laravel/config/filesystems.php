@@ -36,6 +36,13 @@ return [
             'throw' => false,
         ],
 
+        'wandelroutes' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/wandelroutes'),
+            'url' => env('APP_URL').'/wandelroutes',
+            'visibility' => 'public',
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
